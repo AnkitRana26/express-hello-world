@@ -15,7 +15,6 @@ require("./routes/oath.routes");
 const data = process.env;
 
 const app = express();
-app.use(express.static("./build"))
 app.use(expressSession({
     secret:data.SECRET_KEY
 }))
@@ -33,11 +32,11 @@ app.use("/users", userRouter);
 app.use(cartRouter);
 
 app.use(express.static("./build"));
-app.use(
-  expressSession({
-    secret: data.SECRET_KEY,
-  })
-);
+// app.use(
+//   expressSession({
+//     secret: data.SECRET_KEY,
+//   })
+// );
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(
