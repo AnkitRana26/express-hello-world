@@ -2,6 +2,7 @@ const userModel = require("../database/user");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../miscFunction/CommonFunction");
 const User = require("../database/user");
+const { request } = require("express");
 require("dotenv").config();
 
 const signUp = async (body) => {
@@ -17,18 +18,19 @@ const signUp = async (body) => {
   return "Sucessfully Sign Up";
 };
 
-const googleAuth = async (reqest, accessToken, refreshToken, profile, done) => {
-  let user = await userModel.findOne({ email: profile.emails[0].value });
+const googleAuth = async (request, accessToken, refreshToken, profile, done) => {
+  let user = await userModel.findOne({ email: profile['_json'].email });
   
-  console.log(profile);
+  console.log(profile['_json']['given_name'],"Hello");
   if (!user) {
     let body = {
       authType: "google",
-      firstName: profile.name.givenName,
-      image: profile.photos[0].value,
-      email: profile.emails[0].value,
+      firstName: profile['_json']['given_name'],
+      image: profile['_json'].picture,
+      email: profile['_json'].email,
     };
     let newUser = await User.create(body);
+    
   }
 
   return done(null, profile);

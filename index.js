@@ -6,7 +6,7 @@ const { cartRouter } = require("./routes/cart.routes");
 const passport = require("passport");
 const googleStrategy = require("passport-google-oauth20").Strategy;
 const oathRouter = require("./routes/oath.routes");
-// const expressSession = require("express-session");
+const expressSession = require("express-session");
 const { googleAuth } = require("./controllers/user.controller");
 const productRouter = require("./routes/product.router");
 const { orderRouter } = require("./routes/order.routes");
@@ -16,12 +16,18 @@ require("./routes/oath.routes");
 const data = process.env;
 
 const app = express();
-// app.use(expressSession({
-//     secret:data.SECRET_KEY
-// }))
 app.use(
-  cookieSession({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
+  expressSession({
+    name : 'codeil',
+    secret : 'something',
+    resave :false,
+    saveUninitialized: true,
+    cookie : {
+            maxAge:(1000 * 60 * 100)
+    }      
+  })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors());
