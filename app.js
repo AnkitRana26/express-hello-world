@@ -1,59 +1,69 @@
 const express = require("express");
+const { connect } = require("./database/connect");
+const cors = require("cors");
+const userRouter = require("./routes/user.routes");
+const { cartRouter } = require("./routes/cart.routes");
+const passport = require("passport");
+const googleStrategy = require("passport-google-oauth20").Strategy;
+const oathRouter = require("./routes/oath.routes");
+const expressSession = require("express-session");
+const { googleAuth } = require("./controllers/user.controller");
+const productRouter = require("./routes/product.router");
+const { orderRouter } = require("./routes/order.routes");
+require("dotenv").config();
+require("./routes/oath.routes");
+const data = process.env;
+
 const app = express();
-const port = process.env.PORT || 3001;
+app.use(express.static("./build"))
+app.use(expressSession({
+    secret:data.SECRET_KEY
+}))
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(cors());
+app.use(express.json());
+passport.use(new googleStrategy({
+    clientID:data.GOOGLE_CLIENT_ID,
+    clientSecret:data.GOOGLE_SECRET,
+    callbackURL:data.GOOGLE_CALLBACK,
+    passReqToCallback: "true"
+},googleAuth));
+app.use("/users", userRouter);
+app.use(cartRouter);
 
-app.get("/", (req, res) => res.type('html').send(html));
+app.use(express.static("./build"));
+app.use(
+  expressSession({
+    secret: data.SECRET_KEY,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(
+  new googleStrategy(
+    {
+      clientID: data.GOOGLE_CLIENT_ID,
+      clientSecret: data.GOOGLE_SECRET,
+      callbackURL: data.GOOGLE_CALLBACK,
+      passReqToCallback: "true",
+    },
+    googleAuth
+  )
+);
+app.use(oathRouter);
+app.use(cartRouter);
+app.use("/",productRouter)
+app.use(orderRouter)
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-
-
-const html = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello from Render!</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <script>
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          disableForReducedMotion: true
-        });
-      }, 500);
-    </script>
-    <style>
-      @import url("https://p.typekit.net/p.css?s=1&k=vnd5zic&ht=tk&f=39475.39476.39477.39478.39479.39480.39481.39482&a=18673890&app=typekit&e=css");
-      @font-face {
-        font-family: "neo-sans";
-        src: url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff2"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("opentype");
-        font-style: normal;
-        font-weight: 700;
-      }
-      html {
-        font-family: neo-sans;
-        font-weight: 700;
-        font-size: calc(62rem / 16);
-      }
-      body {
-        background: white;
-      }
-      section {
-        border-radius: 1em;
-        padding: 1em;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-right: -50%;
-        transform: translate(-50%, -50%);
-      }
-    </style>
-  </head>
-  <body>
-    <section>
-      Hello from Render!
-    </section>
-  </body>
-</html>
-`
+const PORT = process.argv[2] || 8080;
+connect()
+  .then((res) => {
+    app.listen(PORT, () => {
+      console.log(res);
+      console.log("Connected To Server");
+    });
+  })
+  .catch((err) => {
+    console.log(err.message);
+  });
