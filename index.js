@@ -65,7 +65,7 @@ app.use(cartRouter);
 app.use("/",productRouter)
 app.use(orderRouter)
 
-const PORT = process.argv[2] || 8080;
+const PORT = process.env.PORT || 8080;
 connect()
   .then((res) => {
     app.listen(PORT, () => {
